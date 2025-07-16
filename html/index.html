@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ped Scale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #container {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 280px;
+            z-index: 1000;
+        }
+
+        .scale-panel {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scale-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.08) 50%, 
+                rgba(255, 255, 255, 0.15) 100%);
+            border-radius: 16px;
+            pointer-events: none;
+        }
+
+        .scale-panel::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+        }
+
+        .current-scale-box {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-scale-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.25), 
+                transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .current-scale-box .label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            font-size: 13px;
+            z-index: 2;
+            position: relative;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .current-scale-box .value {
+            color: rgba(255, 255, 255, 1);
+            font-size: 18px;
+            font-weight: 700;
+            z-index: 2;
+            position: relative;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .scale-control-section {
+            margin-bottom: 25px;
+        }
+
+        .scale-control-section label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]:hover {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .scale-indicators {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .scale-value-display {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .scale-value-display span {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            min-width: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .scale-value-display span:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .scale-panel:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="hidden">
+        <div class="scale-panel">
+            <div class="content">
+                <div class="header">
+                    <h1 id="titleText">Karakter Boyutu</h1>
+                    <p id="descText">Karakterinizin boyutunu ayarlayın</p>
+                </div>
+
+                <div class="current-scale-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span id="heightLabel" class="label">Boy:</span>
+                        <span id="currentHeightValue" class="value">1.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="weightLabel" class="label">Kilo:</span>
+                        <span id="currentWeightValue" class="value">1.00</span>
+                    </div>
+                </div>
+
+                <div class="scale-control-section">
+                    <label id="heightControlLabel" for="heightRange">Boy Ayarlama (0.1 - 3.0):</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="heightRange" min="0.1" max="3.0" step="0.05" value="1.0">
+                    </div>
+                    <div class="scale-indicators">
+                        <span>Mini (0.1)</span>
+                        <span>Normal (1.0)</span>
+                        <span>Dev (3.0)</span>
+                    </div>
+                    <div class="scale-value-display">
+                        <span id="heightValue">1.00</span>
+                    </div>
+                </div>
+
+                <div class="scale-control-section">
+                    <label id="weightControlLabel" for="weightRange">Kilo Ayarlama (0.1 - 3.0):</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="weightRange" min="0.1" max="3.0" step="0.05" value="1.0">
+                    </div>
+                    <div class="scale-indicators">
+                        <span>Çubuk (0.1)</span>
+                        <span>Normal (1.0)</span>
+                        <span>Obez (3.0)</span>
+                    </div>
+                    <div class="scale-value-display">
+                        <span id="weightValue">1.00</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button id="resetBtn" class="btn">Sıfırla</button>
+                    <button id="applyBtn" class="btn">Uygula</button>
+                    <button id="closeBtn" class="btn">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const heightRange = document.getElementById('heightRange');
+        const weightRange = document.getElementById('weightRange');
+        const heightValue = document.getElementById('heightValue');
+        const weightValue = document.getElementById('weightValue');
+        const currentHeightValue = document.getElementById('currentHeightValue');
+        const currentWeightValue = document.getElementById('currentWeightValue');
+        const resetBtn = document.getElementById('resetBtn');
+        const applyBtn = document.getElementById('applyBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        let currentHeight = 1.0;
+        let currentWeight = 1.0;
+        let isPreviewMode = false;
+        let locale = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            heightRange.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                heightValue.textContent = value.toFixed(2);
+                updateSliderBackground(this, value, 0.1, 3.0);
+                
+                previewScale();
+                isPreviewMode = true;
+            });
+
+            weightRange.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                weightValue.textContent = value.toFixed(2);
+                updateSliderBackground(this, value, 0.1, 3.0);
+                
+                previewScale();
+                isPreviewMode = true;
+            });
+
+            [heightRange, weightRange].forEach(slider => {
+                slider.addEventListener('mouseup', function() {
+                    isPreviewMode = false;
+                });
+                
+                slider.addEventListener('touchend', function() {
+                    isPreviewMode = false;
+                });
+            });
+
+            resetBtn.addEventListener('click', function() {
+                heightRange.value = 1.0;
+                weightRange.value = 1.0;
+                updateDisplay();
+                applyScale();
+            });
+
+            applyBtn.addEventListener('click', function() {
+                applyScale();
+                isPreviewMode = false;
+            });
+
+            closeBtn.addEventListener('click', function() {
+                if (isPreviewMode) {
+                    previewScale(currentHeight, currentWeight);
+                }
+                closeMenu();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (isPreviewMode) {
+                        previewScale(currentHeight, currentWeight);
+                    }
+                    closeMenu();
+                }
+            });
+        }
+
+        function updateDisplay() {
+            const height = parseFloat(heightRange.value);
+            const weight = parseFloat(weightRange.value);
+            
+            heightValue.textContent = height.toFixed(2);
+            weightValue.textContent = weight.toFixed(2);
+            
+            updateSliderBackground(heightRange, height, 0.1, 3.0);
+            updateSliderBackground(weightRange, weight, 0.1, 3.0);
+        }
+
+        function updateSliderBackground(slider, value, min, max) {
+            const percentage = ((value - min) / (max - min)) * 100;
+            
+            slider.style.background = `linear-gradient(to right, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(255, 255, 255, 0.3) ${percentage}%, 
+                rgba(255, 255, 255, 0.1) ${percentage}%, 
+                rgba(255, 255, 255, 0.1) 100%)`;
+        }
+
+        function updateLocale(localeData) {
+            if (!localeData) return;
+            
+            locale = localeData;
+            document.getElementById('titleText').textContent = locale.title || 'Karakter Boyutu';
+            document.getElementById('descText').textContent = locale.description || 'Karakterinizin boyutunu ayarlayın';
+            document.getElementById('heightLabel').textContent = locale.height_label || 'Boy:';
+            document.getElementById('weightLabel').textContent = locale.weight_label || 'Kilo:';
+            document.getElementById('heightControlLabel').textContent = locale.height_control || 'Boy Ayarlama (0.5 - 1.5):';
+            document.getElementById('weightControlLabel').textContent = locale.weight_control || 'Kilo Ayarlama (0.8 - 1.15):';
+            document.getElementById('resetBtn').textContent = locale.reset || 'Sıfırla';
+            document.getElementById('applyBtn').textContent = locale.apply || 'Uygula';
+            document.getElementById('closeBtn').textContent = locale.close || 'Kapat';
+        }
+
+        function previewScale(height, weight) {
+            const h = height || parseFloat(heightRange.value);
+            const w = weight || parseFloat(weightRange.value);
+            
+            fetch(`https://${GetParentResourceName()}/previewScale`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({height: h, weight: w})
+            });
+        }
+
+        function applyScale() {
+            const height = parseFloat(heightRange.value);
+            const weight = parseFloat(weightRange.value);
+            
+            currentHeight = height;
+            currentWeight = weight;
+            currentHeightValue.textContent = height.toFixed(2);
+            currentWeightValue.textContent = weight.toFixed(2);
+            
+            fetch(`https://${GetParentResourceName()}/applyScale`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({height: height, weight: weight})
+            });
+        }
+
+        function closeMenu() {
+            container.classList.add('hidden');
+            fetch(`https://${GetParentResourceName()}/closeMenu`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({})
+            });
+        }
+
+        function showMenu(data = {}) {
+            currentHeight = data.currentHeight || 1.0;
+            currentWeight = data.currentWeight || 1.0;
+            
+            heightRange.value = currentHeight;
+            weightRange.value = currentWeight;
+            
+            updateDisplay();
+            currentHeightValue.textContent = currentHeight.toFixed(2);
+            currentWeightValue.textContent = currentWeight.toFixed(2);
+            
+            if (data.locale) {
+                updateLocale(data.locale);
+            }
+            
+            container.classList.remove('hidden');
+            isPreviewMode = false;
+        }
+
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            if (data.action === 'showMenu') {
+                showMenu(data);
+            } else if (data.action === 'hideMenu') {
+                container.classList.add('hidden');
+            } else if (data.action === 'updateScale') {
+                currentHeight = data.height;
+                currentWeight = data.weight;
+                currentHeightValue.textContent = currentHeight.toFixed(2);
+                currentWeightValue.textContent = currentWeight.toFixed(2);
+            }
+        });
+
+        function GetParentResourceName() {
+            return 'kers-pedscale';
+        }
+    </script>
+</body>
+</html>

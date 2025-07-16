@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS kers_pedscale (
+    identifier VARCHAR(50) NOT NULL,
+    character_scale FLOAT DEFAULT 1.0,
+    weight_scale FLOAT DEFAULT 1.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (identifier)
+);
