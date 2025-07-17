@@ -48,6 +48,15 @@ Config.Admins = {
 
 ## Screenshots
 
+<img width="322" height="652" alt="image" src="https://github.com/user-attachments/assets/6b5ebce9-2dbe-43b4-b8b5-ea6135d0b8bf" />
+<img width="1210" height="837" alt="image" src="https://github.com/user-attachments/assets/64900d46-4470-47d8-950a-45eff577525a" />
+<img width="1136" height="848" alt="image" src="https://github.com/user-attachments/assets/fe1099be-31e1-4eb3-9048-0fc299efe773" />
+<img width="742" height="766" alt="image" src="https://github.com/user-attachments/assets/5f1e94c3-cccb-4384-9e28-a2ab1b299cd2" />
+<img width="811" height="844" alt="image" src="https://github.com/user-attachments/assets/eef95c95-5c7e-4104-abbc-5d1483f9fc52" />
+<img width="1551" height="903" alt="image" src="https://github.com/user-attachments/assets/c1419076-b161-4017-9504-eadcd64286ee" />
+<img width="1730" height="881" alt="image" src="https://github.com/user-attachments/assets/b909ee49-d2be-4fec-8a6e-ceb551030af1" />
+
+
 
 ## Credits and Acknowledgments
 
