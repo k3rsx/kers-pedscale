@@ -48,7 +48,6 @@ Config.Admins = {
 
 ## Screenshots
 
-*Add screenshots of your UI here*
 
 ## Credits and Acknowledgments
 
